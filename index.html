@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Generator</title>
+  <!-- Include Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Mini Random Password Generator</h1>
+    <form id="password-form">
+      <div class="form-group">
+        <label for="password-length">Password Length:</label>
+        <input type="number" class="form-control" id="password-length" value="12">
+      </div>
+      <div class="form-group">
+        <label>Include:</label><br>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="include-capital" checked>
+          <label class="form-check-label" for="include-capital">Capital Letters</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="include-small" checked>
+          <label class="form-check-label" for="include-small">Small Letters</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="include-numbers" checked>
+          <label class="form-check-label" for="include-numbers">Numbers</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="include-special" checked>
+          <label class="form-check-label" for="include-special">Special Characters</label>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Generate Password</button>
+    </form>
+    <div class="mt-3" id="password-result"></div>
+  </div>
+
+  <!-- Include Bootstrap JS and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    // Embed your generateRandomPassword function here
+    function generateRandomPassword(options) {
+      let charset = '';
+
+      if (options.capital) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      if (options.small) charset += 'abcdefghijklmnopqrstuvwxyz';
+      if (options.numbers) charset += '0123456789';
+      if (options.special) charset += '!@#$%^&*()_+[]{}|;:,.<>?';
+
+      let password = '';
+      let numbersCount = 0;
+      let specialCount = 0;
+
+      for (let i = 0; i < options.length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        const randomChar = charset.charAt(randomIndex);
+
+        if (options.numbers && /[0-9]/.test(randomChar)) {
+          numbersCount++;
+        }
+        if (options.special && /[^a-zA-Z0-9]/.test(randomChar)) {
+          specialCount++;
+        }
+
+        password += randomChar;
+      }
+
+      // Ensure a minimum number of numbers and special characters
+      while (numbersCount < options.minNumbers) {
+        const randomIndex = Math.floor(Math.random() * password.length);
+        const randomChar = '0123456789'.charAt(Math.floor(Math.random() * 10));
+        password = password.slice(0, randomIndex) + randomChar + password.slice(randomIndex);
+        numbersCount++;
+      }
+
+      while (specialCount < options.minSpecial) {
+        const randomIndex = Math.floor(Math.random() * password.length);
+        const randomChar = '!@#$%^&*()_+[]{}|;:,.<>?'.charAt(Math.floor(Math.random() * 15));
+        password = password.slice(0, randomIndex) + randomChar + password.slice(randomIndex);
+        specialCount++;
+      }
+
+      return password;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const passwordForm = document.getElementById("password-form");
+      const passwordResult = document.getElementById("password-result");
+
+      passwordForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        // Get user input
+        const passwordLength = document.getElementById("password-length").value;
+        const includeCapital = document.getElementById("include-capital").checked;
+        const includeSmall = document.getElementById("include-small").checked;
+        const includeNumbers = document.getElementById("include-numbers").checked;
+        const includeSpecial = document.getElementById("include-special").checked;
+
+        // Prepare options to send to the server
+        const options = {
+          length: passwordLength,
+          capital: includeCapital,
+          small: includeSmall,
+          numbers: includeNumbers,
+          special: includeSpecial,
+          minNumbers: 1, // You can adjust these as needed
+          minSpecial: 1, // You can adjust these as needed
+        };
+
+        // Generate the password using the embedded function
+        const password = generateRandomPassword(options);
+        
+        // Display the generated password
+        passwordResult.innerHTML = `<p class="mt-3"><strong>Generated Password:</strong> ${password}</p>`;
+      });
+    });
+  </script>
+</body>
+</html>
